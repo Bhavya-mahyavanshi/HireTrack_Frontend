@@ -1,10 +1,11 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
 @import "tailwindcss";
 @import "../styles/tokens.css";
 
 /* Inter is the documented fallback for SF Pro Display/Text off-Apple platforms.
    Loaded as a variable font so weight 300 (the doc's "rare, deliberate" weight)
    is available without separate font files. */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
 * {
   box-sizing: border-box;

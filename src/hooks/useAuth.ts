@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { authApi } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/authStore";
@@ -31,6 +31,7 @@ export function useRegister() {
 
   return useMutation({
     mutationFn: (data: RegisterFormValues) =>
+      // Strip confirmPassword — it's client-side only, backend doesn't want it
       authApi.register({
         name: data.name,
         email: data.email,
@@ -38,7 +39,7 @@ export function useRegister() {
       }),
     onSuccess: (response) => {
       setAuth(response.token, { email: response.email, name: response.name });
-      toast.success(`Welcome to HireTrack. ${response.name.split(" ")[0]}.`);
+      toast.success(`Welcome to HireTrack, ${response.name.split(" ")[0]}.`);
       router.push("/dashboard");
     },
     onError: (error) => {

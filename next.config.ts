@@ -10,8 +10,7 @@ const nextConfig: NextConfig = {
   output: "export",
   images: {
     unoptimized: true, // static export can't use the Next.js Image Optimization API
-  },
-  trailingSlash: true, // avoids 404s on static hosts / Tauri's local file server
+  }, // avoids 404s on static hosts / Tauri's local file server
 };
 
 export default nextConfig;
