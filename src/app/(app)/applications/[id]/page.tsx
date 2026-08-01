@@ -273,15 +273,34 @@ export default function ApplicationDetailPage() {
                   {app.resumeVersion}
                 </div>
               )}
-              <Button
-                as="a"
-                variant="ghost"
-                size="sm"
-                fullWidth
-                rightIcon={<ExternalLink className="w-3.5 h-3.5" strokeWidth={1.5} />}
-              >
-                View job posting
-              </Button>
+              {/* FIX: Button doesn't support an `as` prop — it's always a
+                  <button>, never a link. Use a plain <a> styled to match the
+                  ghost button instead, per app.url (adjust field name below
+                  if your ApplicationResponse type stores it differently). */}
+              {app.url && (
+                <a
+                  href={app.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 8,
+                    width: "100%",
+                    height: 32,
+                    borderRadius: 11,
+                    fontFamily: "var(--font-text)",
+                    fontSize: 14,
+                    color: "var(--color-primary)",
+                    textDecoration: "none",
+                    background: "transparent",
+                  }}
+                >
+                  View job posting
+                  <ExternalLink className="w-3.5 h-3.5" strokeWidth={1.5} />
+                </a>
+              )}
             </div>
           </Card>
         </motion.div>

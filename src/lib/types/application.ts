@@ -48,4 +48,7 @@ export interface ApplicationResponse {
   notes: string | null;
   resumeVersion: string | null;
   matchScore: number | null; // null until a match has ever been calculated
+  url: string | null; // the original job posting URL — null for very old
+  // manually-created applications from before this field
+  // was added to the backend
 }
