@@ -7,19 +7,22 @@ import { Loader2 } from "lucide-react";
 type ButtonVariant = "primary" | "secondary" | "ghost" | "destructive";
 type ButtonSize = "sm" | "md" | "lg";
 
-interface ButtonProps extends Omit<HTMLMotionProps<"button">, "size"> {
+// FIX: HTMLMotionProps<"button">'s own `children` type includes
+// MotionValue<number | string> (used when animating a raw value directly
+// as content) — that's not assignable to React.ReactNode, which is what
+// {children} actually needs when rendered normally. Omitting "children"
+// alongside "size" and re-declaring it as plain ReactNode resolves the
+// mismatch without losing any of Motion's other prop types.
+interface ButtonProps extends Omit<HTMLMotionProps<"button">, "size" | "children"> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   fullWidth?: boolean;
+  children?: React.ReactNode;
 }
 
-// All colors/sizes as plain JS objects read into inline styles — this is
-// the same fix applied to Input, Card, and the auth pages: Tailwind's
-// utility-class scanner has been unreliable throughout this project, so
-// every visual property here bypasses it entirely via style={{}}.
 const VARIANT_STYLES: Record<ButtonVariant, { bg: string; color: string; border: string; hoverBg: string }> = {
   primary: { bg: "var(--color-primary)", color: "var(--color-on-primary)", border: "1px solid transparent", hoverBg: "var(--color-primary-focus)" },
   secondary: { bg: "var(--color-surface-chip)", color: "var(--color-ink)", border: "1px solid var(--color-hairline)", hoverBg: "rgba(200,200,205,0.64)" },
