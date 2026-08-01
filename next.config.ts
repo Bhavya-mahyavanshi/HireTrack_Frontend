@@ -7,7 +7,6 @@ import type { NextConfig } from "next";
 // client-side straight to the Spring Boot backend. That's the correct shape
 // here since there's no SSR dependency on the backend's data.
 const nextConfig: NextConfig = {
-  output: "export",
   images: {
     unoptimized: true, // static export can't use the Next.js Image Optimization API
   }, // avoids 404s on static hosts / Tauri's local file server

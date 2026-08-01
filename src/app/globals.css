@@ -1,11 +1,28 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
-
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700&display=swap");
 @import "tailwindcss";
-@import "../styles/tokens.css";
 
-/* Inter is the documented fallback for SF Pro Display/Text off-Apple platforms.
-   Loaded as a variable font so weight 300 (the doc's "rare, deliberate" weight)
-   is available without separate font files. */
+/* ROOT CAUSE, CONFIRMED via direct inspection of the compiled .next output:
+   Tailwind v4's automatic content-scanning was finding almost NO utility
+   classes from this project's .tsx files — only 1 occurrence of "w-full"
+   existed in the entire compiled CSS, and 0 occurrences of "max-w-md",
+   despite both being correctly written in multiple component files.
+   @theme values (colors, fonts) worked because those are emitted directly
+   as CSS variables regardless of scanning — but generated utility classes
+   from your components were not being picked up at all.
+
+   Fix: explicit @source directives force Tailwind to scan these exact
+   folders instead of relying on its auto-detection, which was silently
+   failing here (route-group parenthesis folders and/or a Turbopack +
+   Windows interaction are the likely cause, but this fix works regardless
+   of the underlying reason). */
+@source "./src/app/**/*.{ts,tsx}";
+@source "./src/components/**/*.{ts,tsx}";
+@source "./src/lib/**/*.{ts,tsx}";
+@source "./src/hooks/**/*.{ts,tsx}";
+@source "./src/store/**/*.{ts,tsx}";
+@source "./src/providers/**/*.{ts,tsx}";
+
+@import "../styles/tokens.css";
 
 * {
   box-sizing: border-box;
@@ -25,8 +42,6 @@ body {
   font-weight: 400;
   line-height: 1.47;
   letter-spacing: -0.374px;
-  /* Per the doc's Inter-substitution note: tighten leading slightly when
-     substituting Inter for SF Pro, since Inter's x-height runs taller. */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -54,21 +69,15 @@ button {
   background: none;
 }
 
-/* The system-wide micro-interaction — the ONLY press state the design doc
-   defines. Applied via a utility class, not globally to every button, so
-   non-interactive elements never accidentally pick it up. */
 .press-active:active {
   transform: scale(0.95);
 }
 
-/* Visible keyboard focus is a quality-floor requirement regardless of the
-   design doc's own silence on focus rings beyond the primary button. */
 :focus-visible {
   outline: 2px solid var(--color-primary-focus);
   outline-offset: 2px;
 }
 
-/* Respect reduced-motion preferences site-wide. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

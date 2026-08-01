@@ -11,78 +11,51 @@ export default function ApplicationsPage() {
   const { data: applications = [], isLoading } = useApplications();
 
   return (
-    <div className="flex flex-col gap-xl">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="flex items-center justify-between"
-      >
-        <div className="flex flex-col gap-xxs">
-          <div className="flex items-center gap-sm">
-            <LayoutGrid className="w-5 h-5 text-ink-muted-48" strokeWidth={1.5} />
-            <h1 className="font-display font-semibold text-display-md text-ink tracking-tight">
+    <div style={{ display: "flex", flexDirection: "column", gap: 32, width: "100%" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", flexWrap: "wrap", gap: 16 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <LayoutGrid size={20} strokeWidth={1.5} color="var(--color-ink-muted-48)" />
+            <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 34, color: "var(--color-ink)", margin: 0 }}>
               Applications
             </h1>
           </div>
-          <p className="font-text text-caption text-ink-muted-48">
-            {isLoading
-              ? "Loading your pipeline…"
-              : `${applications.length} application${applications.length !== 1 ? "s" : ""} tracked`}
+          <p style={{ fontSize: 14, color: "var(--color-ink-muted-48)", margin: 0 }}>
+            {isLoading ? "Loading your pipeline…" : `${applications.length} application${applications.length !== 1 ? "s" : ""} tracked`}
           </p>
         </div>
 
-        <Link href="/applications/new">
-          <Button
-            variant="primary"
-            size="md"
-            leftIcon={<Plus className="w-4 h-4" strokeWidth={2} />}
-          >
-            <span className="hidden tablet:inline">Add application</span>
-            <span className="tablet:hidden">Add</span>
+        <Link href="/applications/new" style={{ textDecoration: "none" }}>
+          <Button variant="primary" size="md" leftIcon={<Plus size={16} strokeWidth={2} />}>
+            Add application
           </Button>
         </Link>
-      </motion.div>
+      </div>
 
-      {/* Kanban board */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.15, duration: 0.35 }}
-        // Negative horizontal margin to let the board bleed past the shell's padding,
-        // then re-add it inside so scrollbar appears at the right edge
-        className="-mx-lg px-lg overflow-x-auto"
-      >
+      <div style={{ width: "100%", overflowX: "auto" }}>
         <KanbanBoard applications={applications} isLoading={isLoading} />
-      </motion.div>
+      </div>
 
-      {/* Empty state */}
       {!isLoading && applications.length === 0 && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.97 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-          className="flex flex-col items-center justify-center py-section text-center gap-lg"
-        >
-          <div className="w-16 h-16 rounded-2xl bg-canvas-parchment flex items-center justify-center">
-            <LayoutGrid className="w-8 h-8 text-ink-muted-48" strokeWidth={1} />
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "80px 0", textAlign: "center", gap: 24 }}>
+          <div style={{ width: 64, height: 64, borderRadius: 16, background: "var(--color-canvas-parchment)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <LayoutGrid size={32} strokeWidth={1} color="var(--color-ink-muted-48)" />
           </div>
-          <div className="flex flex-col gap-xs max-w-xs">
-            <p className="font-display font-semibold text-tagline text-ink">
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 320 }}>
+            <p style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 21, color: "var(--color-ink)", margin: 0 }}>
               Your pipeline is empty
             </p>
-            <p className="text-caption text-ink-muted-48 leading-relaxed">
+            <p style={{ fontSize: 14, color: "var(--color-ink-muted-48)", lineHeight: 1.6, margin: 0 }}>
               Add your first application by pasting a job posting URL — HireTrack
               will pull the details automatically.
             </p>
           </div>
-          <Link href="/applications/new">
-            <Button variant="primary" size="lg" leftIcon={<Plus className="w-4 h-4" strokeWidth={2} />}>
+          <Link href="/applications/new" style={{ textDecoration: "none" }}>
+            <Button variant="primary" size="lg" leftIcon={<Plus size={16} strokeWidth={2} />}>
               Add your first application
             </Button>
           </Link>
-        </motion.div>
+        </div>
       )}
     </div>
   );

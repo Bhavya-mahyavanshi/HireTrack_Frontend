@@ -3,11 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Calendar, Sparkles, Building2, MapPin } from "lucide-react";
-import { clsx } from "clsx";
+import { Calendar, Building2, MapPin } from "lucide-react";
 import { formatDistanceToNow, parseISO, isToday, isTomorrow } from "date-fns";
 import { ApplicationResponse } from "@/lib/types";
-import { StatusBadge } from "@/components/ui/StatusBadge";
 
 interface ApplicationCardProps {
   application: ApplicationResponse;
@@ -18,39 +16,14 @@ function MatchRing({ score }: { score: number }) {
   const r = 14;
   const circ = 2 * Math.PI * r;
   const filled = (score / 100) * circ;
-  const color =
-    score >= 70
-      ? "var(--color-status-offer)"
-      : score >= 40
-      ? "var(--color-status-interview)"
-      : "var(--color-status-rejected)";
-
+  const color = score >= 70 ? "var(--color-status-offer)" : score >= 40 ? "var(--color-status-interview)" : "var(--color-status-rejected)";
   return (
-    <div className="relative w-9 h-9 flex items-center justify-center shrink-0">
-      <svg className="absolute inset-0 -rotate-90" width="36" height="36">
-        {/* Track */}
-        <circle
-          cx="18" cy="18" r={r}
-          fill="none"
-          stroke="var(--color-hairline)"
-          strokeWidth="2.5"
-        />
-        {/* Fill */}
-        <circle
-          cx="18" cy="18" r={r}
-          fill="none"
-          stroke={color}
-          strokeWidth="2.5"
-          strokeDasharray={`${filled} ${circ}`}
-          strokeLinecap="round"
-        />
+    <div style={{ position: "relative", width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+      <svg style={{ position: "absolute", inset: 0, transform: "rotate(-90deg)" }} width="36" height="36">
+        <circle cx="18" cy="18" r={r} fill="none" stroke="var(--color-hairline)" strokeWidth="2.5" />
+        <circle cx="18" cy="18" r={r} fill="none" stroke={color} strokeWidth="2.5" strokeDasharray={`${filled} ${circ}`} strokeLinecap="round" />
       </svg>
-      <span
-        className="relative text-[10px] font-semibold font-text leading-none"
-        style={{ color }}
-      >
-        {score}
-      </span>
+      <span style={{ position: "relative", fontSize: 10, fontWeight: 600, color }}>{score}</span>
     </div>
   );
 }
@@ -58,32 +31,21 @@ function MatchRing({ score }: { score: number }) {
 function FollowUpChip({ dateStr }: { dateStr: string }) {
   const date = parseISO(dateStr);
   const urgent = isToday(date) || isTomorrow(date);
-  const label = isToday(date)
-    ? "Today"
-    : isTomorrow(date)
-    ? "Tomorrow"
-    : formatDistanceToNow(date, { addSuffix: true });
-
+  const label = isToday(date) ? "Today" : isTomorrow(date) ? "Tomorrow" : formatDistanceToNow(date, { addSuffix: true });
   return (
-    <span
-      className={clsx(
-        "inline-flex items-center gap-xxs",
-        "text-fine-print px-xs py-[2px] rounded-pill border",
-        urgent
-          ? "text-status-interview border-[rgba(192,138,62,0.3)] bg-[rgba(192,138,62,0.08)]"
-          : "text-ink-muted-48 border-hairline bg-canvas-parchment"
-      )}
-    >
-      <Calendar className="w-2.5 h-2.5" strokeWidth={2} />
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, padding: "2px 8px", borderRadius: 9999,
+      border: `1px solid ${urgent ? "rgba(192,138,62,0.3)" : "var(--color-hairline)"}`,
+      color: urgent ? "var(--color-status-interview)" : "var(--color-ink-muted-48)",
+      background: urgent ? "rgba(192,138,62,0.08)" : "var(--color-canvas-parchment)",
+    }}>
+      <Calendar size={10} strokeWidth={2} />
       {label}
     </span>
   );
 }
 
-export function ApplicationCard({
-  application: app,
-  onDragStart,
-}: ApplicationCardProps) {
+export function ApplicationCard({ application: app, onDragStart }: ApplicationCardProps) {
   const [isDragging, setIsDragging] = useState(false);
 
   return (
@@ -92,61 +54,57 @@ export function ApplicationCard({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.2 }}
       draggable
-      onDragStart={() => {
-        setIsDragging(true);
-        onDragStart(app.id);
-      }}
+      onDragStart={() => { setIsDragging(true); onDragStart(app.id); }}
       onDragEnd={() => setIsDragging(false)}
-      className={clsx(
-        "bg-canvas rounded-lg border border-hairline p-md",
-        "cursor-grab active:cursor-grabbing",
-        "select-none",
-        "transition-shadow duration-150",
-        isDragging
-          ? "opacity-40 shadow-[0_8px_24px_rgba(0,0,0,0.12)] rotate-[1.5deg]"
-          : "hover:shadow-[0_2px_12px_rgba(0,0,0,0.06)] hover:-translate-y-px"
-      )}
+      style={{
+        background: "var(--color-canvas)",
+        borderRadius: 11,
+        border: "1px solid var(--color-hairline)",
+        padding: 12,
+        cursor: isDragging ? "grabbing" : "grab",
+        userSelect: "none",
+        opacity: isDragging ? 0.4 : 1,
+        boxShadow: isDragging ? "0 8px 24px rgba(0,0,0,0.12)" : "none",
+        transform: isDragging ? "rotate(1.5deg)" : "none",
+        transition: "box-shadow 150ms ease, opacity 150ms ease",
+      }}
     >
       <Link
         href={`/applications/${app.id}`}
         draggable={false}
-        className="flex flex-col gap-sm"
-        onClick={(e) => isDragging && e.preventDefault()}
+        onClick={(e) => { if (isDragging) e.preventDefault(); }}
+        style={{ display: "flex", flexDirection: "column", gap: 8, textDecoration: "none", color: "inherit" }}
       >
-        {/* Title row */}
-        <div className="flex items-start justify-between gap-xs">
-          <p className="font-text text-caption-strong text-ink leading-snug line-clamp-2 flex-1">
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
+          <p style={{
+            fontFamily: "var(--font-text)", fontSize: 13, fontWeight: 600, color: "var(--color-ink)",
+            lineHeight: 1.35, margin: 0, flex: 1,
+            display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
+          }}>
             {app.jobTitle}
           </p>
           {app.matchScore !== null && <MatchRing score={app.matchScore} />}
         </div>
 
-        {/* Company + location */}
-        <div className="flex flex-col gap-xxs">
-          <span className="flex items-center gap-xxs text-fine-print text-ink-muted-48">
-            <Building2 className="w-3 h-3 shrink-0" strokeWidth={1.5} />
-            <span className="truncate">{app.company}</span>
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "var(--color-ink-muted-48)" }}>
+            <Building2 size={11} strokeWidth={1.5} />
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{app.company}</span>
           </span>
           {app.location && (
-            <span className="flex items-center gap-xxs text-fine-print text-ink-muted-48">
-              <MapPin className="w-3 h-3 shrink-0" strokeWidth={1.5} />
-              <span className="truncate">{app.location}</span>
+            <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "var(--color-ink-muted-48)" }}>
+              <MapPin size={11} strokeWidth={1.5} />
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{app.location}</span>
             </span>
           )}
         </div>
 
-        {/* Footer chips */}
-        <div className="flex items-center gap-xxs flex-wrap pt-xxs border-t border-hairline">
-          {app.followUpDate && <FollowUpChip dateStr={app.followUpDate} />}
-          {app.resumeVersion && (
-            <span className="inline-flex items-center gap-xxs text-fine-print px-xs py-[2px] rounded-pill border border-hairline text-ink-muted-48 bg-canvas-parchment">
-              <Sparkles className="w-2.5 h-2.5" strokeWidth={2} />
-              {app.resumeVersion}
-            </span>
-          )}
-        </div>
+        {app.followUpDate && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 4, paddingTop: 4, borderTop: "1px solid var(--color-hairline)" }}>
+            <FollowUpChip dateStr={app.followUpDate} />
+          </div>
+        )}
       </Link>
     </motion.div>
   );

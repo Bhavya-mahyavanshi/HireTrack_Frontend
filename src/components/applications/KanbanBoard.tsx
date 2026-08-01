@@ -2,11 +2,9 @@
 
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { clsx } from "clsx";
 import { ApplicationResponse, ApplicationStatus, KANBAN_COLUMN_ORDER } from "@/lib/types";
 import { STATUS_LABELS } from "@/components/ui/StatusBadge";
 import { ApplicationCard } from "./ApplicationCard";
-import { CardSkeleton } from "@/components/ui/Skeleton";
 import { useUpdateStatus } from "@/hooks/useApplications";
 
 interface KanbanBoardProps {
@@ -15,17 +13,19 @@ interface KanbanBoardProps {
 }
 
 const COLUMN_ACCENT: Record<ApplicationStatus, string> = {
-  SAVED: "border-t-[var(--color-status-saved)]",
-  APPLIED: "border-t-[var(--color-status-applied)]",
-  PHONE_SCREEN: "border-t-[var(--color-status-interview)]",
-  TECHNICAL: "border-t-[var(--color-status-interview)]",
-  FINAL_ROUND: "border-t-[var(--color-status-interview)]",
-  OFFER: "border-t-[var(--color-status-offer)]",
-  REJECTED: "border-t-[var(--color-status-rejected)]",
-  WITHDRAWN: "border-t-[var(--color-status-withdrawn)]",
+  SAVED: "var(--color-status-saved)",
+  APPLIED: "var(--color-status-applied)",
+  PHONE_SCREEN: "var(--color-status-interview)",
+  TECHNICAL: "var(--color-status-interview)",
+  FINAL_ROUND: "var(--color-status-interview)",
+  OFFER: "var(--color-status-offer)",
+  REJECTED: "var(--color-status-rejected)",
+  WITHDRAWN: "var(--color-status-withdrawn)",
 };
 
-interface ColumnProps {
+function KanbanColumn({
+  status, cards, isDragOver, onDragOver, onDrop, onDragLeave, onDragStart,
+}: {
   status: ApplicationStatus;
   cards: ApplicationResponse[];
   isDragOver: boolean;
@@ -33,82 +33,57 @@ interface ColumnProps {
   onDrop: () => void;
   onDragLeave: () => void;
   onDragStart: (id: number) => void;
-}
+}) {
+  const dashedColor = isDragOver ? "var(--color-primary)" : "var(--color-hairline)";
 
-function KanbanColumn({
-  status,
-  cards,
-  isDragOver,
-  onDragOver,
-  onDrop,
-  onDragLeave,
-  onDragStart,
-}: ColumnProps) {
   return (
-    <div className="flex flex-col gap-sm min-w-[240px] w-[240px] flex-shrink-0">
-      {/* Column header */}
-      <div className="flex items-center justify-between px-xs">
-        <span className="text-caption-strong text-ink-muted-80 tracking-tight">
+    <div style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: 240, width: 240, flexShrink: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 4px" }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--color-ink-muted-80)" }}>
           {STATUS_LABELS[status]}
         </span>
-        <span
-          className={clsx(
-            "text-fine-print font-semibold w-5 h-5 rounded-full flex items-center justify-center",
-            cards.length > 0
-              ? "bg-canvas-parchment text-ink"
-              : "text-ink-muted-48"
-          )}
-        >
+        <span style={{
+          fontSize: 11, fontWeight: 600, width: 20, height: 20, borderRadius: "50%",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          background: cards.length > 0 ? "var(--color-canvas-parchment)" : "transparent",
+          color: cards.length > 0 ? "var(--color-ink)" : "var(--color-ink-muted-48)",
+        }}>
           {cards.length}
         </span>
       </div>
 
-      {/* Drop zone */}
-      <motion.div
-        animate={{
-          backgroundColor: isDragOver
-            ? "rgba(0,102,204,0.04)"
-            : "transparent",
-          borderColor: isDragOver
-            ? "var(--color-primary)"
-            : "var(--color-hairline)",
-        }}
-        transition={{ duration: 0.15 }}
+      <div
         onDragOver={onDragOver}
         onDrop={onDrop}
         onDragLeave={onDragLeave}
-        className={clsx(
-          "flex-1 flex flex-col gap-sm",
-          "min-h-[120px] rounded-xl border-2 border-dashed p-xs",
-          "transition-colors duration-150",
-          // Accent stripe — top border color per status
-          "border-t-2 border-t-solid",
-          COLUMN_ACCENT[status]
-        )}
         style={{
-          borderTopStyle: "solid",
-          borderTopWidth: "2px",
+          flex: 1, display: "flex", flexDirection: "column", gap: 8,
+          minHeight: 160, borderRadius: 14, padding: 8, boxSizing: "border-box",
+          // FIX: split into individual sides instead of shorthand `border` +
+          // `borderTop` together — mixing shorthand and longhand for the
+          // same property is undefined behavior in React's style diffing.
+          borderLeftWidth: 2, borderLeftStyle: "dashed", borderLeftColor: dashedColor,
+          borderRightWidth: 2, borderRightStyle: "dashed", borderRightColor: dashedColor,
+          borderBottomWidth: 2, borderBottomStyle: "dashed", borderBottomColor: dashedColor,
+          borderTopWidth: 3, borderTopStyle: "solid", borderTopColor: COLUMN_ACCENT[status],
+          background: isDragOver ? "rgba(0,102,204,0.04)" : "transparent",
+          transition: "background 150ms ease, border-color 150ms ease",
         }}
       >
         <AnimatePresence>
           {cards.map((app) => (
-            <ApplicationCard
-              key={app.id}
-              application={app}
-              onDragStart={onDragStart}
-            />
+            <ApplicationCard key={app.id} application={app} onDragStart={onDragStart} />
           ))}
         </AnimatePresence>
 
-        {/* Empty state */}
         {cards.length === 0 && !isDragOver && (
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-fine-print text-ink-muted-48 text-center leading-relaxed">
+          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", minHeight: 100 }}>
+            <p style={{ fontSize: 11, color: "var(--color-ink-muted-48)", textAlign: "center", margin: 0 }}>
               Drop here
             </p>
           </div>
         )}
-      </motion.div>
+      </div>
     </div>
   );
 }
@@ -118,17 +93,12 @@ export function KanbanBoard({ applications, isLoading }: KanbanBoardProps) {
   const draggedId = useRef<number | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<ApplicationStatus | null>(null);
 
-  const byStatus = KANBAN_COLUMN_ORDER.reduce(
-    (acc, status) => {
-      acc[status] = applications.filter((a) => a.status === status);
-      return acc;
-    },
-    {} as Record<ApplicationStatus, ApplicationResponse[]>
-  );
+  const byStatus = KANBAN_COLUMN_ORDER.reduce((acc, status) => {
+    acc[status] = applications.filter((a) => a.status === status);
+    return acc;
+  }, {} as Record<ApplicationStatus, ApplicationResponse[]>);
 
-  const handleDragStart = (id: number) => {
-    draggedId.current = id;
-  };
+  const handleDragStart = (id: number) => { draggedId.current = id; };
 
   const handleDragOver = (e: React.DragEvent, status: ApplicationStatus) => {
     e.preventDefault();
@@ -148,42 +118,29 @@ export function KanbanBoard({ applications, isLoading }: KanbanBoardProps) {
     setDragOverColumn(null);
   };
 
-  const handleDragLeave = () => {
-    setDragOverColumn(null);
-  };
-
   if (isLoading) {
     return (
-      <div className="flex gap-md overflow-x-auto pb-md">
+      <div style={{ display: "flex", gap: 16, overflowX: "auto", paddingBottom: 16 }}>
         {KANBAN_COLUMN_ORDER.slice(0, 5).map((status) => (
-          <div key={status} className="flex flex-col gap-sm min-w-[240px]">
-            <div className="h-4 w-20 rounded bg-canvas-parchment animate-pulse" />
-            <div className="rounded-xl border-2 border-dashed border-hairline p-xs flex flex-col gap-sm min-h-[120px]">
-              <CardSkeleton />
-            </div>
-          </div>
+          <div key={status} style={{ minWidth: 240, height: 140, borderRadius: 14, background: "var(--color-canvas-parchment)" }} />
         ))}
       </div>
     );
   }
 
   return (
-    <div
-      className="flex gap-md overflow-x-auto pb-md"
-      style={{ scrollSnapType: "x mandatory" }}
-    >
+    <div style={{ display: "flex", gap: 16, overflowX: "auto", paddingBottom: 16, width: "100%" }}>
       {KANBAN_COLUMN_ORDER.map((status) => (
-        <div key={status} style={{ scrollSnapAlign: "start" }}>
-          <KanbanColumn
-            status={status}
-            cards={byStatus[status] ?? []}
-            isDragOver={dragOverColumn === status}
-            onDragOver={(e) => handleDragOver(e, status)}
-            onDrop={() => handleDrop(status)}
-            onDragLeave={handleDragLeave}
-            onDragStart={handleDragStart}
-          />
-        </div>
+        <KanbanColumn
+          key={status}
+          status={status}
+          cards={byStatus[status] ?? []}
+          isDragOver={dragOverColumn === status}
+          onDragOver={(e) => handleDragOver(e, status)}
+          onDrop={() => handleDrop(status)}
+          onDragLeave={() => setDragOverColumn(null)}
+          onDragStart={handleDragStart}
+        />
       ))}
     </div>
   );
