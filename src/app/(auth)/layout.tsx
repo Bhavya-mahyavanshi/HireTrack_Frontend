@@ -5,15 +5,6 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useAuthStore } from "@/store/authStore";
 
-// This redesign uses inline styles (referencing the @theme CSS variables
-// from tokens.css directly) for every layout-critical property — width,
-// max-width, display, flex structure. Confirmed via direct inspection of
-// compiled CSS: Tailwind's utility-class generation was unreliable in this
-// project (only 1 of dozens of expected classes compiled), while @theme's
-// CSS custom properties compiled correctly 100% of the time. Inline styles
-// read those same variables directly, so they render correctly regardless
-// of whether Tailwind's class scanner is working.
-
 export default function AuthLayout({
   children,
 }: {
@@ -30,7 +21,6 @@ export default function AuthLayout({
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--color-canvas)", display: "flex" }}>
-      {/* Left panel — decorative, hidden below 900px */}
       <div
         className="hide-on-mobile"
         style={{
@@ -46,11 +36,7 @@ export default function AuthLayout({
           animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.5, 0.3] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
           style={{
-            position: "absolute",
-            top: "-20%",
-            left: "-10%",
-            width: 600,
-            height: 600,
+            position: "absolute", top: "-20%", left: "-10%", width: 600, height: 600,
             borderRadius: "50%",
             background: "radial-gradient(circle, rgba(0,102,204,0.4) 0%, transparent 70%)",
           }}
@@ -59,38 +45,23 @@ export default function AuthLayout({
           animate={{ scale: [1, 1.1, 1], opacity: [0.2, 0.4, 0.2] }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 3 }}
           style={{
-            position: "absolute",
-            bottom: "-10%",
-            right: "-15%",
-            width: 500,
-            height: 500,
+            position: "absolute", bottom: "-10%", right: "-15%", width: 500, height: 500,
             borderRadius: "50%",
             background: "radial-gradient(circle, rgba(41,151,255,0.3) 0%, transparent 70%)",
           }}
         />
 
-        <div
-          style={{
-            position: "relative",
-            zIndex: 10,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            height: "100%",
-            width: "100%",
-            padding: 48,
-            boxSizing: "border-box",
-          }}
-        >
-          {/* Logo */}
+        <div style={{
+          position: "relative", zIndex: 10, display: "flex", flexDirection: "column",
+          justifyContent: "space-between", height: "100%", width: "100%", padding: 48,
+          boxSizing: "border-box",
+        }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, width: "100%" }}>
-            <div
-              style={{
-                width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                background: "var(--color-primary)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}
-            >
+            <div style={{
+              width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+              background: "var(--color-primary)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
               <span style={{ color: "var(--color-on-primary)", fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14 }}>H</span>
             </div>
             <span style={{ color: "var(--color-on-dark)", fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 17, letterSpacing: "-0.3px" }}>
@@ -98,45 +69,48 @@ export default function AuthLayout({
             </span>
           </div>
 
-          {/* Hero copy block — fixed width in px, not a Tailwind max-w class */}
           <div style={{ display: "flex", flexDirection: "column", gap: 24, width: "100%", maxWidth: 420 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 4 }}>
-              {["Saved", "Applied", "Interview", "Offer"].map((stage, i) => {
-                const colors = [
-                  { bg: "rgba(138,138,146,0.15)", fg: "var(--color-status-saved)", bd: "rgba(138,138,146,0.25)" },
-                  { bg: "rgba(90,143,214,0.15)", fg: "var(--color-status-applied)", bd: "rgba(90,143,214,0.25)" },
-                  { bg: "rgba(192,138,62,0.15)", fg: "var(--color-status-interview)", bd: "rgba(192,138,62,0.25)" },
-                  { bg: "rgba(74,157,110,0.15)", fg: "var(--color-status-offer)", bd: "rgba(74,157,110,0.25)" },
-                ][i];
-                return (
-                  <motion.div
-                    key={stage}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 + i * 0.12, duration: 0.4 }}
-                    style={{ display: "flex", alignItems: "center", gap: 8 }}
+              {(
+                [
+                  { label: "Saved", bg: "rgba(138,138,146,0.15)", fg: "var(--color-status-saved)", bd: "rgba(138,138,146,0.25)" },
+                  { label: "Applied", bg: "rgba(90,143,214,0.15)", fg: "var(--color-status-applied)", bd: "rgba(90,143,214,0.25)" },
+                  { label: "Interview", bg: "rgba(192,138,62,0.15)", fg: "var(--color-status-interview)", bd: "rgba(192,138,62,0.25)" },
+                  { label: "Offer", bg: "rgba(74,157,110,0.15)", fg: "var(--color-status-offer)", bd: "rgba(74,157,110,0.25)" },
+                ] as const
+              ).map((stage, i, arr) => (
+                // FIX: mapping the same fixed-length array directly (instead
+                // of indexing a separate colors array by `i`) removes the
+                // possibly-undefined lookup entirely — TypeScript can now
+                // see `stage` is always defined since we're iterating the
+                // array itself, not indexing into it by number.
+                <motion.div
+                  key={stage.label}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 + i * 0.12, duration: 0.4 }}
+                  style={{ display: "flex", alignItems: "center", gap: 8 }}
+                >
+                  <div
+                    style={{
+                      padding: "4px 12px", borderRadius: 9999, fontSize: 12,
+                      fontFamily: "var(--font-text)", fontWeight: 500, whiteSpace: "nowrap",
+                      background: stage.bg, color: stage.fg, border: `1px solid ${stage.bd}`,
+                    }}
                   >
-                    <div
-                      style={{
-                        padding: "4px 12px", borderRadius: 9999, fontSize: 12,
-                        fontFamily: "var(--font-text)", fontWeight: 500, whiteSpace: "nowrap",
-                        background: colors.bg, color: colors.fg, border: `1px solid ${colors.bd}`,
-                      }}
+                    {stage.label}
+                  </div>
+                  {i < arr.length - 1 && (
+                    <motion.span
+                      initial={{ opacity: 0 }} animate={{ opacity: 0.4 }}
+                      transition={{ delay: 0.6 + i * 0.12 }}
+                      style={{ color: "var(--color-body-muted)", fontSize: 12 }}
                     >
-                      {stage}
-                    </div>
-                    {i < 3 && (
-                      <motion.span
-                        initial={{ opacity: 0 }} animate={{ opacity: 0.4 }}
-                        transition={{ delay: 0.6 + i * 0.12 }}
-                        style={{ color: "var(--color-body-muted)", fontSize: 12 }}
-                      >
-                        →
-                      </motion.span>
-                    )}
-                  </motion.div>
-                );
-              })}
+                      →
+                    </motion.span>
+                  )}
+                </motion.div>
+              ))}
             </div>
 
             <motion.h1
@@ -193,7 +167,6 @@ export default function AuthLayout({
         </div>
       </div>
 
-      {/* Right panel — the form */}
       <div
         style={{
           flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
@@ -219,8 +192,6 @@ export default function AuthLayout({
         </motion.div>
       </div>
 
-      {/* Minimal responsive rules — plain CSS, not Tailwind, so they can't
-          silently fail to compile the way utility classes did. */}
       <style jsx global>{`
         @media (max-width: 899px) {
           .hide-on-mobile { display: none !important; }
